@@ -1,0 +1,14 @@
+# Maintainer: Raafat Turki <raafat.turki@pm.me>
+
+pkgname=meta-fonts
+pkgver=0.1
+pkgrel=1
+pkgdesc="meta fonts"
+arch=('x86_64')
+license=('MIT')
+provides=(
+adobe-source-code-pro-fonts
+cantarell-fonts
+ttf-opensans
+gsfonts
+)

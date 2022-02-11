@@ -1,0 +1,61 @@
+#!/usr/bin/bash
+
+REPO_ROOT=`dirname $(realpath $0)`
+REPO_NAME='personal'
+
+# TODO: parse args to decide which build mode to execute in
+# -a --all (default) | -s --single
+# -n --normal (default) | -f --force
+
+# export MAKEPKG_CONF="$REPO_ROOT/makepkg.conf"
+export PKGDEST="$REPO_ROOT/repo/x86_64"
+export LOGDEST="$REPO_ROOT/logs"
+export DBGSRCDIR="$REPO_ROOT/dbg_src/"
+export PACKAGER="$(git config user.name) <$(git config user.email)>"
+
+build_pkgbuild() {
+  makepkg -sc
+}
+
+build_all_pkgs() {
+  # for dir in $REPO_ROOT/pkgfiles/*/; do
+  for pkg in `ls $REPO_ROOT/pkgfiles`; do
+    echo "building $pkg"
+    cd "$REPO_ROOT/pkgfiles/$pkg"
+    build_pkgbuild
+  done
+}
+
+build_single_pkg() {
+  pkg=`ls $REPO_ROOT/pkgfiles | fzf`
+  echo "building $pkg"
+  cd "$REPO_ROOT/pkgfiles/$pkg"
+  build_pkgbuild
+}
+
+build_db() {
+  cd $PKGDEST
+  repo-add "$REPO_NAME.db.tar.gz" *.pkg.tar.zst
+
+  # remove unwanted files
+  UNWANTED_FILES=(
+    $REPO_NAME.db
+    $REPO_NAME.files
+    $REPO_NAME.db.tar.gz.old
+    $REPO_NAME.files.tar.gz.old
+  )
+
+  for p in ${UNWANTED_FILES[@]}; do
+    if [ -e $p ]; then
+      rm $p
+    fi
+  done
+
+  # rename databases
+  mv $REPO_NAME.db.tar.gz $REPO_NAME.db
+  mv $REPO_NAME.files.tar.gz $REPO_NAME.files
+}
+
+# build_single_pkg
+build_all_pkgs
+build_db
