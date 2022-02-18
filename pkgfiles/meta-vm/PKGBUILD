@@ -13,6 +13,7 @@ ebtables
 dnsmasq
 edk2-ovmf
 virt-manager
+dmidecode
 
 systemd
 )
