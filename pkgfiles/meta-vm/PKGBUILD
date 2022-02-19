@@ -2,7 +2,7 @@
 
 pkgname=meta-vm
 pkgver=0.1
-pkgrel=1
+pkgrel=2
 pkgdesc="meta libvirt setup"
 arch=('x86_64')
 license=('MIT')
