@@ -9,12 +9,13 @@ REPO_NAME='personal'
 
 # export MAKEPKG_CONF="$REPO_ROOT/makepkg.conf"
 export PKGDEST="$REPO_ROOT/repo/x86_64"
-export LOGDEST="$REPO_ROOT/logs"
-export DBGSRCDIR="$REPO_ROOT/dbg_src/"
 export PACKAGER="$(git config user.name) <$(git config user.email)>"
 
 build_pkgbuild() {
-  makepkg -sc
+  MAKEPKG_FLAGS=${1:-'-scC'}
+  makepkg $MAKEPKG_FLAGS
+  JUNK_FILES=`ls | grep -v 'PKGBUILD'`
+  rm -rf $JUNK_FILES
 }
 
 build_all_pkgs() {
@@ -27,7 +28,8 @@ build_all_pkgs() {
 }
 
 build_single_pkg() {
-  pkg=`ls $REPO_ROOT/pkgfiles | fzf`
+  PKG_NAME=${1:-''}
+  pkg=`ls $REPO_ROOT/pkgfiles | fzf -1 -0 -q $PKG_NAME`
   echo "building $pkg"
   cd "$REPO_ROOT/pkgfiles/$pkg"
   build_pkgbuild
@@ -56,6 +58,7 @@ build_db() {
   mv $REPO_NAME.files.tar.gz $REPO_NAME.files
 }
 
+# build_single_pkg micromess
 # build_single_pkg
 build_all_pkgs
 build_db
