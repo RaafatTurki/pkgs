@@ -1,12 +1,12 @@
 # Maintainer: Raafat Turki <raafat.turki@pm.me>
 
-pkgname=umess
+pkgname=micromess
 pkgver=0.1
 pkgrel=1
 pkgdesc="A simple X pop-up"
-arch=(any)
+arch=('x86_64')
 license=('MIT')
-source=("${pkgname}::git+https://github.com/RaafatTurki/micromess.git")
+source=("git+https://github.com/RaafatTurki/micromess.git")
 md5sums=('SKIP')
 
 build() {
