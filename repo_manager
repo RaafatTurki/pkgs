@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-REPO_ROOT=`dirname $(realpath $0)`
+REPO_ROOT=$(dirname $(realpath $0))
 REPO_NAME='personal'
 
 # TODO: parse args to decide which build mode to execute in
@@ -14,13 +14,16 @@ export PACKAGER="$(git config user.name) <$(git config user.email)>"
 build_pkgbuild() {
   MAKEPKG_FLAGS=${1:-'-scC'}
   makepkg $MAKEPKG_FLAGS
-  JUNK_FILES=`ls | grep -v 'PKGBUILD'`
-  rm -rf $JUNK_FILES
+ 
+  # remove everything other than PKGBUILD
+  GLOBIGNORE='PKGBUILD'
+  trash *
 }
 
 build_all_pkgs() {
-  # for dir in $REPO_ROOT/pkgfiles/*/; do
-  for pkg in `ls $REPO_ROOT/pkgfiles`; do
+
+  for pkgfile_dir in $REPO_ROOT/pkgfiles/*/; do
+    pkg=$(basename $pkgfile_dir)
     echo "building $pkg"
     cd "$REPO_ROOT/pkgfiles/$pkg"
     build_pkgbuild
@@ -29,7 +32,8 @@ build_all_pkgs() {
 
 build_single_pkg() {
   PKG_NAME=${1:-''}
-  pkg=`ls $REPO_ROOT/pkgfiles | fzf -1 -0 -q $PKG_NAME`
+  pkg=$(find $REPO_ROOT/pkgfiles -maxdepth 1 -printf '%P\n' | fzf -1 -0 -q $PKG_NAME)
+
   echo "building $pkg"
   cd "$REPO_ROOT/pkgfiles/$pkg"
   build_pkgbuild
@@ -58,7 +62,7 @@ build_db() {
   mv $REPO_NAME.files.tar.gz $REPO_NAME.files
 }
 
-# build_single_pkg micromess
+# build_single_pkg shortsig
 # build_single_pkg
 build_all_pkgs
 build_db
