@@ -1,0 +1,86 @@
+#!/bin/bash
+set -o errexit
+[[ -v AUR_DEBUG ]] && set -o xtrace
+argv0=build--pkglist
+PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+
+# default options
+lint=0 mode=pkglist
+
+usage() {
+    printf >&2 'usage: %s [--srcinfo] [--lint] [--config <file>]' "$argv0"
+    exit 1
+}
+
+# mollyguard for sourcing PKGBUILDs
+if [[ $UID == 0 ]] && ! [[ -v AUR_ASROOT ]]; then
+    printf >&2 'aur-%s is not meant to be run as root.\n' "$argv0"
+    printf >&2 'To proceed anyway, set the %s variable.\n' 'AUR_ASROOT'
+    exit 1
+fi
+
+source /usr/share/makepkg/util/option.sh
+source /usr/share/makepkg/util/parseopts.sh
+source /usr/share/makepkg/util/config.sh
+
+# option parsing
+opt_short='p:'
+opt_long=('buildscript:' 'config:' 'lint' 'srcinfo' 'full')
+opt_hidden=('dump-options')
+
+if ! parseopts "$opt_short" "${opt_long[@]}" "${opt_hidden[@]}" -- "$@"; then
+    usage
+fi
+set -- "${OPTRET[@]}"
+
+unset buildscript makepkg_conf
+while true; do
+    case "$1" in
+        -p|--buildscript)
+            shift; buildscript=$1 ;;
+        --config)
+            shift; makepkg_conf=$1 ;;
+        --full)
+            mode=pkglist_full ;;
+        --srcinfo)
+            mode=srcinfo ;;
+        --lint)
+            lint=1 ;;
+        --dump-options)
+            printf -- '--%s\n' "${opt_long[@]}" ${AUR_DEBUG+"${opt_hidden[@]}"}
+            printf -- '%s' "${opt_short}" | sed 's/.:\?/-&\n/g'
+            exit ;;
+        --) shift; break ;;
+    esac
+    shift
+done
+
+# shellcheck disable=SC1090
+source "${buildscript-PKGBUILD}"
+pkgbase=${pkgbase:-$pkgname}
+PKGDEST=${PKGDEST:-$PWD}
+
+# PKGEXT (packagelist), CARCH (lint)
+load_makepkg_config "${makepkg_conf-}"
+
+if (( lint )); then
+    source /usr/share/makepkg/lint_pkgbuild.sh
+    lint_pkgbuild
+fi
+
+case $mode in
+    pkglist)
+        source /usr/share/makepkg/util/pkgbuild.sh
+        print_all_package_names
+        ;;
+    pkglist_full)
+        source /usr/share/makepkg/util/pkgbuild.sh
+        print_all_package_names | while IFS= read -r; do
+            printf '%s:%s\n' "$pkgbase" "$REPLY"
+        done ;;
+    srcinfo) 
+        source /usr/share/makepkg/srcinfo.sh
+        write_srcinfo_content
+        ;;
+esac
+

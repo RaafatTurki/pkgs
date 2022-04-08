@@ -13,15 +13,20 @@ export PACKAGER="$(git config user.name) <$(git config user.email)>"
 
 build_pkgbuild() {
   MAKEPKG_FLAGS=${1:-'-scC'}
-  makepkg $MAKEPKG_FLAGS
+  
+  if [ -e $($REPO_ROOT/lib/aur-build--pkglist) ]; then
+    echo "package build is up to date"
+  else
+    makepkg $MAKEPKG_FLAGS
+
+    # remove everything other than PKGBUILD
+    GLOBIGNORE='PKGBUILD'
+    trash *
+  fi
  
-  # remove everything other than PKGBUILD
-  GLOBIGNORE='PKGBUILD'
-  trash *
 }
 
 build_all_pkgs() {
-
   for pkgfile_dir in $REPO_ROOT/pkgfiles/*/; do
     pkg=$(basename $pkgfile_dir)
     echo "building $pkg"
