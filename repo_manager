@@ -18,10 +18,8 @@ build_pkgbuild() {
     echo "package build is up to date"
   else
     makepkg $MAKEPKG_FLAGS
-
-    # remove everything other than PKGBUILD
-    GLOBIGNORE='PKGBUILD'
-    trash *
+    # remove build products
+    git clean -di
   fi
  
 }
