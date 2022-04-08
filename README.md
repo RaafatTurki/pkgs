@@ -14,9 +14,9 @@ or this one to connects a local version of it
 SigLevel = PackageOptional DatabaseOptional
 Server = file:///path/to/pkgs/repo/$arch
 ```
-follow the above with a mirror refresh
+follow the above with a system update
 ```bash
-pacman -Sy
+pacman -Syu
 ```
 and that's all, you should be able to install whatever is hosted here via `pacman`
 
