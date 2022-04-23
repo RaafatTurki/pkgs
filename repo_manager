@@ -13,7 +13,7 @@ export PACKAGER="$(git config user.name) <$(git config user.email)>"
 
 build_pkgbuild() {
   MAKEPKG_FLAGS=${1:-'-scC'}
-  
+
   if [ -e $($REPO_ROOT/lib/aur-build--pkglist) ]; then
     echo "package build is up to date"
   else
@@ -21,7 +21,6 @@ build_pkgbuild() {
     # remove build products
     git clean -di
   fi
- 
 }
 
 build_all_pkgs() {
