@@ -1,12 +1,15 @@
 # Maintainer: Raafat Turki <raafat.turki@pm.me>
 
-pkgname=meta-zathura
+pkgname=zathura-meta
 pkgver=0.1
 pkgrel=1
-pkgdesc="meta zathura"
+pkgdesc="zathura meta package"
 arch=('x86_64')
 license=('MIT')
 depends=(
 zathura
 zathura-pdf-mupdf
+zathura-cb
+zathura-djvu
+zathura-ps
 )
