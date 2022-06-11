@@ -1,0 +1,18 @@
+# Maintainer: Raafat Turki <raafat.turki@pm.me>
+
+pkgname=libvirt-meta
+pkgver=0.1
+pkgrel=1
+pkgdesc="Meta package for libvirt"
+arch=(x86_64)
+license=(unknown)
+install=".install"
+depends=(
+  libvirt
+  qemu
+  ebtables
+  dnsmasq
+  edk2-ovmf
+  virt-manager
+  dmidecode
+)

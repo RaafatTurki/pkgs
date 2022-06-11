@@ -14,7 +14,7 @@ export PACKAGER="$(git config user.name) <$(git config user.email)>"
 build_pkgbuild() {
   MAKEPKG_FLAGS=${1:-'-scC'}
 
-  if [ -e $($REPO_ROOT/lib/aur-build--pkglist) ]; then
+  if [ -e $(/usr/lib/aurutils/aur-build--pkglist) ]; then
     echo "package build is up to date"
   else
     makepkg $MAKEPKG_FLAGS
@@ -24,20 +24,23 @@ build_pkgbuild() {
 }
 
 build_all_pkgs() {
-  for pkgfile_dir in $REPO_ROOT/pkgfiles/*/; do
+  local DIR=$1
+
+  for pkgfile_dir in $DIR/*/; do
     pkg=$(basename $pkgfile_dir)
     echo "building $pkg"
-    cd "$REPO_ROOT/pkgfiles/$pkg"
+    cd "$DIR/$pkg"
     build_pkgbuild
   done
 }
 
 build_single_pkg() {
-  PKG_NAME=${1:-''}
-  pkg=$(find $REPO_ROOT/pkgfiles -maxdepth 1 -printf '%P\n' | fzf -1 -0 -q $PKG_NAME)
+  local DIR=$1
+  local PKG_NAME=${1:-''}
+  pkg=$(find $DIR -maxdepth 1 -printf '%P\n' | fzf -1 -0 -q $PKG_NAME)
 
   echo "building $pkg"
-  cd "$REPO_ROOT/pkgfiles/$pkg"
+  cd "$DIR/$pkg"
   build_pkgbuild
 }
 
@@ -66,5 +69,5 @@ build_db() {
 
 # build_single_pkg shortsig
 # build_single_pkg
-build_all_pkgs
+build_all_pkgs $REPO_ROOT/pkgfiles/personal
 build_db

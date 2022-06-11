@@ -1,0 +1,18 @@
+# Maintainer: Raafat Turki <raafat.turki@pm.me>
+
+pkgname=compression-meta
+pkgver=0.1
+pkgrel=1
+pkgdesc="Meta package for compression"
+arch=(x86_64)
+license=(unknown)
+depends=(
+  gzip
+  tar
+  unzip
+  zip
+  p7zip
+  unace
+  unrar
+  brotli
+)

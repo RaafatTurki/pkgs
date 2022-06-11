@@ -1,0 +1,14 @@
+# Maintainer: Raafat Turki <raafat.turki@pm.me>
+
+pkgname=fake-fonts
+pkgver=0.1
+pkgrel=1
+pkgdesc="provides unneeded but required fonts"
+arch=(x86_64)
+license=(unknown)
+provides=(
+  adobe-source-code-pro-fonts
+  cantarell-fonts
+  ttf-opensans
+  gsfonts
+)

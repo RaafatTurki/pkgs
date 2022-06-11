@@ -1,0 +1,8 @@
+post_install() {
+  echo -e "\nTo enable the libvirt service execute the following commands with root permission:\n"
+
+  echo "systemctl enable --now libvirtd"
+  echo "virsh net-start default"
+  echo "systemctl restart libvirtd"
+  echo "usermod -G libvirt -a $USER"
+}

@@ -1,0 +1,14 @@
+# Maintainer: Raafat Turki <raafat.turki@pm.me>
+
+pkgname=fs-meta
+pkgver=0.1
+pkgrel=1
+pkgdesc="Meta packages for filesystems"
+arch=(x86_64)
+license=(unknown)
+depends=(
+  gvfs
+  gvfs-gphoto2
+  gvfs-mtp
+  gvfs-smb
+)
