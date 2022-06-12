@@ -12,21 +12,23 @@ export PKGDEST="$REPO_ROOT/repo/x86_64"
 export PACKAGER="$(git config user.name) <$(git config user.email)>"
 
 build_pkgbuild() {
+  dep_check aur
   MAKEPKG_FLAGS=${1:-'-scC'}
 
-  if [ -e $(/usr/lib/aurutils/aur-build--pkglist) ]; then
+  if [ -e $(aur build--pkglist) ]; then
     echo "package build is up to date"
   else
-    makepkg $MAKEPKG_FLAGS
+    aur chroot -D $REPO_ROOT/chroot --build
+    # makepkg $MAKEPKG_FLAGS
     # remove build products
-    git clean -di
+    # git clean -di
   fi
 }
 
 build_all_pkgs() {
   local DIR=$1
 
-  for pkgfile_dir in $DIR/*/; do
+  for pkgfile_dir in `find $DIR -mindepth 1 -maxdepth 1 -type d`; do
     pkg=$(basename $pkgfile_dir)
     echo "building $pkg"
     cd "$DIR/$pkg"
@@ -36,8 +38,10 @@ build_all_pkgs() {
 
 build_single_pkg() {
   local DIR=$1
-  local PKG_NAME=${1:-''}
-  pkg=$(find $DIR -maxdepth 1 -printf '%P\n' | fzf -1 -0 -q $PKG_NAME)
+  local PKG_NAME=${2:-''}
+
+  local pkg=$(find $DIR -maxdepth 1 -printf '%P\n' | fzf -1 -0 -q $PKG_NAME)
+  if [ -z $pkg ]; then return; fi
 
   echo "building $pkg"
   cd "$DIR/$pkg"
@@ -67,7 +71,90 @@ build_db() {
   mv $REPO_NAME.files.tar.gz $REPO_NAME.files
 }
 
-# build_single_pkg shortsig
-# build_single_pkg
-build_all_pkgs $REPO_ROOT/pkgfiles/personal
-build_db
+make_chroot_env() {
+  dep_check aur
+  dep_check mkarchroot
+  mkdir -p $REPO_ROOT/chroot
+  aur chroot -D $REPO_ROOT/chroot --makepkg-conf $REPO_ROOT/config/makepkg.conf --pacman-conf $REPO_ROOT/config/pacman.conf --create
+}
+
+rm_chroot_env() {
+  gio trash $REPO_ROOT/chroot
+}
+
+
+
+build_all() {
+  make_chroot_env
+  build_all_pkgs $REPO_ROOT/pkgfiles/personal
+  build_all_pkgs $REPO_ROOT/pkgfiles/aur
+  build_db
+}
+
+build() {
+  make_chroot_env
+  build_single_pkg $REPO_ROOT/pkgfiles/personal "$@"
+  build_single_pkg $REPO_ROOT/pkgfiles/aur "$@"
+  # build_db
+}
+
+mkchroot() {
+  make_chroot_env
+}
+
+rmchroot() {
+  rm_chroot_env
+}
+
+
+dep_check() {
+  cmd=$1
+  opt=${2:-true}
+  msg="Missing dependency '$cmd'"
+
+  type -p "$cmd" &>/dev/null || {
+    notify-send "Scrscn" "$msg"
+    echo "$msg"
+    if $opt ; then exit 2 ; fi
+  }
+}
+
+help() {
+	cat <<-EOF
+Usage: term COMMAND [ARGS...]
+
+Commands:
+
+    build_all         Build all unbuilt and outdated PKGBUILDs in aur and personal
+    build [pkgname]   Build a single PKGBUILD in aur and personal
+    mkchroot          Make a clean chroot environment and exit
+    rmchroot          Trash chroot environment
+    help              Print this help text.
+EOF
+}
+
+default() {
+  build_all
+}
+
+main() {
+  if [ $# -eq 0 ]; then
+    default
+    exit 0
+  fi
+
+  cmd="$1"
+  shift
+
+  case "$cmd" in
+    rmchroot|mkchroot|build|build_all)
+      "$cmd" "$@"
+      ;;
+    *)
+      echo "Unknown command $cmd"
+      help
+      exit 2
+  esac
+}
+
+main "$@"
