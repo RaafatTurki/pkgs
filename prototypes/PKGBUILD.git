@@ -1,0 +1,36 @@
+# Maintainer: Raafat Turki <raafat.turki@pm.me>
+
+pkgname="<TEXT>-git"
+pkgver=_
+pkgrel=1
+pkgdesc="TEXT"
+arch=(x86_64)
+license=(TEXT)
+url="https://github.com/<TEXT>"
+source=("${pkgname}::git+https://github.com/TEXT")
+depends=()
+makedepends=('git')
+provides=(TEXT)
+conflicts=(TEXT)
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$pkgname"
+
+  if git describe --long --tags &>/dev/null; then
+    git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+  else
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  fi
+}
+
+build() {
+  cd "$srcdir/$pkgname"
+  # make
+}
+
+package() {
+  cd "$srcdir/$pkgname"
+  # make PREFIX="$pkgdir/usr" install
+  # install -D LICENSE -t "${pkgdir}/usr/share/licenses/${pkgname}"
+}

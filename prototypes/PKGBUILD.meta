@@ -1,0 +1,14 @@
+# Maintainer: Raafat Turki <raafat.turki@pm.me>
+
+pkgname=TEXT-meta
+pkgver=_
+pkgrel=1
+pkgdesc="TEXT"
+arch=(x86_64)
+license=(unknown)
+source=("${pkgname}::git+https://github.com/TEXT")
+depends=(
+  TEXT
+  TEXT
+  TEXT
+)
